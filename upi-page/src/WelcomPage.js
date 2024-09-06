@@ -1,7 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import './WelcomePage.css'; // Ensure this path is correct
-
+import  './Welcome.css';
 const WelcomePage = () => {
     const location = useLocation();
     const user = location.state?.user;

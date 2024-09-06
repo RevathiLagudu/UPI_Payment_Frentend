@@ -22,7 +22,7 @@ const RegistrationForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/api/link', formData);
+            const response = await axios.post(' http://localhost:8080/users/register', formData);
             navigate('/welcome', { state: { user: response.data } });
         } catch (error) {
             console.error('There was an error creating the bank account!', error);
