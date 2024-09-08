@@ -1,7 +1,7 @@
+// src/RegistrationForm.js
 import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import './RegistrationForm';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import './RegistrationForm.css'; // Import the CSS file
 
 const RegistrationForm = () => {
     const [formData, setFormData] = useState({
@@ -12,76 +12,130 @@ const RegistrationForm = () => {
         address: '',
         pin: ''
     });
-    const navigate = useNavigate();
+
+    const [errors, setErrors] = useState({});
+    const navigate = useNavigate(); // Initialize useNavigate
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+
+        // Clear errors for the field being updated
+        setErrors({
+            ...errors,
+            [e.target.name]: ''
+        });
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        // Validate PIN
+        if (!/^\d{6}$/.test(formData.pin)) {
+            newErrors.pin = 'PIN must be exactly 6 digits';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
         try {
-            const response = await axios.post(' http://localhost:8080/users/register', formData);
-            navigate('/welcome', { state: { user: response.data } });
+            const response = await fetch('http://localhost:8080/users/register', { // Adjust the URL to your endpoint
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                // Handle successful registration
+                alert('User registered successfully');
+                setFormData({
+                    firstName: '',
+                    lastName: '',
+                    mobileNumber: '',
+                    email: '',
+                    address: '',
+                    pin: ''
+                });
+                navigate('/CreateBankAccountForm'); // Redirect to CreateBankAccountForm
+            } else {
+                // Handle errors
+                alert('Failed to register user');
+            }
         } catch (error) {
-            console.error('There was an error creating the bank account!', error);
+            console.error('An error occurred:', error);
+            alert('An error occurred during registration');
         }
     };
 
     return (
-        <form className="registration-form" onSubmit={handleSubmit}>
+        <div className="registration-form">
             <h2>Register</h2>
-            <input
-                type="text"
-                name="firstName"
-                placeholder="First Name"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-            />
-            <input
-                type="text"
-                name="lastName"
-                placeholder="Last Name"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-            />
-            <input
-                type="text"
-                name="mobileNumber"
-                placeholder="Mobile Number"
-                value={formData.mobileNumber}
-                onChange={handleChange}
-                required
-            />
-            <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-            />
-            <input
-                type="text"
-                name="address"
-                placeholder="Address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-            />
-            <input
-                type="password"
-                name="pin"
-                placeholder="PIN"
-                value={formData.pin}
-                onChange={handleChange}
-                required
-            />
-            <button type="submit">Register</button>
-        </form>
+            <form onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    placeholder="First Name"
+                    required
+                />
+                <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    placeholder="Last Name"
+                    required
+                />
+                <input
+                    type="text"
+                    name="mobileNumber"
+                    value={formData.mobileNumber}
+                    onChange={handleChange}
+                    placeholder="Mobile Number"
+                    required
+                />
+                <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Email"
+                    required
+                />
+                <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    placeholder="Address"
+                />
+                <input
+                    type="text"
+                    name="pin"
+                    value={formData.pin}
+                    onChange={handleChange}
+                    placeholder="PIN (6 digits)"
+                    pattern="\d{6}"
+                    maxLength="6"
+                    required
+                />
+                {errors.pin && <p className="error">{errors.pin}</p>}
+                <button type="submit">Register</button>
+            </form>
+        </div>
     );
 };
 

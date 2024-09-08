@@ -1,86 +1,66 @@
-// src/components/Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './Login.css'; // Import CSS for Login component
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    phoneNumber: '',
-    password: '',
-  });
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate= useNavigate
+    const [mobileNumber, setMobileNumber] = useState('');
+    const [pin, setPin] = useState('');
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            const response = await axios.post('http://localhost:8080/users/login', { mobileNumber, pin });
+            const { userId, firstName } = response.data;
 
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.phoneNumber) newErrors.phoneNumber = 'Phone number is required';
-    if (!formData.password) newErrors.password = 'Password is required';
-    return newErrors;
-  };
+            // Store userId and firstName in localStorage
+            localStorage.setItem('userId', userId);
+            localStorage.setItem('firstName', firstName);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      const response = await axios.post('http://localhost:9090/users/login', formData);
-      console.log('User logged in successfully:', response.data);
-      // Handle successful login (e.g., redirect, store token)
-    } catch (error) {
-      navigate('/createAccount')
-      console.error('Error logging in user:', error);
-      // Handle error (e.g., show an error message)
-    } finally {
-      setIsSubmitting(false);
-      
+            setError(null);
+            // Navigate to UserBankAccounts with userId in state
+            navigate('/UserBankAccounts', { state: { userId } });
+        } catch (err) {
+            setError('Login failed. Please check your credentials.');
+        }
+    };
 
-    }
-  };
+    const handleRegisterClick = () => {
+        navigate('/register');
+    };
 
-  return (
-    <div className="login-container">
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="phoneNumber">Phone Number:</label>
-          <input
-            type="text"
-            id="phoneNumber"
-            name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleChange}
-          />
-          {errors.phoneNumber && <p className="error">{errors.phoneNumber}</p>}
+    return (
+        <div className="login-container">
+            <h2>Login</h2>
+            <form onSubmit={handleSubmit} className="login-form">
+                <div>
+                    <label htmlFor="mobileNumber">Mobile Number:</label>
+                    <input
+                        type="text"
+                        id="mobileNumber"
+                        value={mobileNumber}
+                        onChange={(e) => setMobileNumber(e.target.value)}
+                        required
+                    />
+                </div>
+                <div>
+                    <label htmlFor="pin">PIN:</label>
+                    <input
+                        type="password"
+                        id="pin"
+                        value={pin}
+                        onChange={(e) => setPin(e.target.value)}
+                        required
+                    />
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            {error && <p className="error">{error}</p>}
+            <button className="register-button" onClick={handleRegisterClick}>Register</button>
         </div>
-
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-          />
-          {errors.password && <p className="error">{errors.password}</p>}
-        </div>
-
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
-    </div>
-  );
+    );
 };
 
 export default Login;
