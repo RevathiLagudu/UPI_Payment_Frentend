@@ -1,7 +1,7 @@
 // src/RegistrationForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import './RegistrationForm.css'; // Import the CSS file
+import './RegistrationForm.css';
 
 const RegistrationForm = () => {
     const [formData, setFormData] = useState({
@@ -14,7 +14,7 @@ const RegistrationForm = () => {
     });
 
     const [errors, setErrors] = useState({});
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate(); // Initialize the navigate function
 
     const handleChange = (e) => {
         setFormData({
@@ -22,7 +22,6 @@ const RegistrationForm = () => {
             [e.target.name]: e.target.value
         });
 
-        // Clear errors for the field being updated
         setErrors({
             ...errors,
             [e.target.name]: ''
@@ -32,7 +31,6 @@ const RegistrationForm = () => {
     const validateForm = () => {
         const newErrors = {};
 
-        // Validate PIN
         if (!/^\d{6}$/.test(formData.pin)) {
             newErrors.pin = 'PIN must be exactly 6 digits';
         }
@@ -49,7 +47,7 @@ const RegistrationForm = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/users/register', { // Adjust the URL to your endpoint
+            const response = await fetch('http://localhost:8080/users/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -58,7 +56,6 @@ const RegistrationForm = () => {
             });
 
             if (response.ok) {
-                // Handle successful registration
                 alert('User registered successfully');
                 setFormData({
                     firstName: '',
@@ -68,9 +65,9 @@ const RegistrationForm = () => {
                     address: '',
                     pin: ''
                 });
-                navigate('/CreateBankAccountForm'); // Redirect to CreateBankAccountForm
+                // Navigate to CreateBankAccountForm page
+                navigate('/create-bank-account');
             } else {
-                // Handle errors
                 alert('Failed to register user');
             }
         } catch (error) {
